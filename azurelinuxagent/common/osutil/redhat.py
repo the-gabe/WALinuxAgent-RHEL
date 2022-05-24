@@ -142,3 +142,21 @@ class RedhatOSUtil(Redhat6xOSUtil):
             endpoint = self.get_endpoint_from_leases_path('/var/lib/NetworkManager/dhclient-*.lease')
 
         return endpoint
+
+    def restart_if(self, ifname, retries=3, wait=5):
+        """
+        Restart an interface by bouncing the link.
+        """
+        retry_limit=retries+1
+        for attempt in range(1, retry_limit):
+            try:
+                shellutil.run_command(["ip", "link", "set", ifname, "down"])
+                shellutil.run_command(["ip", "link", "set", ifname, "up"])
+
+            except shellutil.CommandError as cmd_err:
+                logger.warn("failed to restart {0}: return code {1}".format(ifname, cmd_err.returncode))
+                if attempt < retry_limit:
+                    logger.info("retrying in {0} seconds".format(wait))
+                    time.sleep(wait)
+                else:
+                    logger.warn("exceeded restart retries")
