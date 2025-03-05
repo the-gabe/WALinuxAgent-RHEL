@@ -1203,9 +1203,9 @@ class WireClient(object):
         host_channel = lambda: self.__send_request_using_host_channel(host_func)
 
         if HostPluginProtocol.is_default_channel:
-            primary_channel, secondary_channel = host_channel, direct_channel
+            primary_channel, secondary_channel = host_channel, host_channel
         else:
-            primary_channel, secondary_channel = direct_channel, host_channel
+            primary_channel, secondary_channel = host_channel, host_channel
 
         ret = primary_channel()
         if ret is not None:
